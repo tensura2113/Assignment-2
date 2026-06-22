@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>My Assignment 2</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f0f0;
+      margin: 20px;
+    }
+
+    h1 {
+      color: navy;
+      text-align: center;
+    }
+
+    h2 {
+      color: darkblue;
+      border-bottom: 2px solid navy;
+      padding-bottom: 5px;
+    }
+
+    .section {
+      background-color: white;
+      padding: 20px;
+      margin-bottom: 30px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    /* ---- TABLE ---- */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+
+    th {
+      background-color: navy;
+      color: white;
+      padding: 10px;
+      text-align: left;
+    }
+
+    td {
+      padding: 9px 10px;
+      border-bottom: 1px solid #ccc;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f5f5f5;
+    }
+
+    .pass {
+      color: green;
+      font-weight: bold;
+    }
+
+    .fail {
+      color: red;
+      font-weight: bold;
+    }
+
+    .class-label {
+      margin-top: 15px;
+      margin-bottom: 5px;
+      font-weight: bold;
+      font-size: 15px;
+      color: darkblue;
+    }
+
+    /* ---- FORM ---- */
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+
+    input[type="text"], input[type="password"] {
+      padding: 8px;
+      width: 280px;
+      border: 1px solid #aaa;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+
+    input.valid-input {
+      border-color: green;
+    }
+
+    input.invalid-input {
+      border-color: red;
+    }
+
+    .feedback {
+      margin-top: 5px;
+      font-size: 13px;
+    }
+
+    .feedback.ok {
+      color: green;
+    }
+
+    .feedback.error {
+      color: red;
+    }
+
+    button {
+      padding: 8px 16px;
+      background-color: navy;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      margin-top: 5px;
+    }
+
+    button:hover {
+      background-color: blue;
+    }
+
+    #form-result {
+      margin-top: 15px;
+      font-weight: bold;
+      font-size: 15px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>DOM & JavaScript Assignment 2</h1>
+
+  <!-- ====== SECTION 1: STUDENT AVERAGES ====== -->
+  <div class="section">
+    <h2>1. Student Average Score Calculator</h2>
+
+    <div class="class-label">Class A</div>
+    <table id="tableA">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>CSC101</th>
+          <th>CSC102</th>
+          <th>CSC103</th>
+          <th>Average</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="bodyA"></tbody>
+    </table>
+
+    <div class="class-label">Class B</div>
+    <table id="tableB">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>CSC101</th>
+          <th>CSC102</th>
+          <th>CSC103</th>
+          <th>Average</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="bodyB"></tbody>
+    </table>
+  </div>
+
+  <!-- ====== SECTION 2: REGISTRATION FORM VALIDATOR ====== -->
+  <div class="section">
+    <h2>2. Registration Form Validator</h2>
+
+    <div class="form-group">
+      <label for="username">Username</label>
+      <input type="text" id="username" placeholder="Enter username" oninput="validateUsername()" />
+      <div class="feedback" id="usernameFeedback"></div>
+    </div>
+
+    <div class="form-group">
+      <label for="password">Password</label>
+      <input type="password" id="password" placeholder="Enter password" oninput="validatePassword()" />
+      <div class="feedback" id="passwordFeedback"></div>
+    </div>
+
+    <div class="form-group">
+      <label for="phone">Phone Number</label>
+      <input type="text" id="phone" placeholder="+2348012345678" oninput="validatePhone()" />
+      <div class="feedback" id="phoneFeedback"></div>
+    </div>
+
+    <button onclick="submitForm()">Submit</button>
+    <div id="form-result"></div>
+  </div>
+
+
+  <script>
+
+    // ============================================================
+    //  PART 1: STUDENT AVERAGE SCORES
+    // ============================================================
+
+    let schoolData = '{"classA":[{"name":"Amara","CSC101":72,"CSC102":55,"CSC103":68},{"name":"Chidi","CSC101":40,"CSC102":48,"CSC103":35},{"name":"Ngozi","CSC101":85,"CSC102":90,"CSC103":78},{"name":"Emeka","CSC101":60,"CSC102":52,"CSC103":44}],"classB":[{"name":"Fatima","CSC101":91,"CSC102":88,"CSC103":95},{"name":"Tunde","CSC101":30,"CSC102":45,"CSC103":50},{"name":"Blessing","CSC101":77,"CSC102":63,"CSC103":70},{"name":"Seun","CSC101":55,"CSC102":49,"CSC103":58}]}';
+
+    let data = JSON.parse(schoolData);
+
+    function buildTable(students, tbodyId) {
+      let tbody = document.getElementById(tbodyId);
+      tbody.innerHTML = "";
+
+      for (let i = 0; i < students.length; i++) {
+        let s = students[i];
+        let avg = (s.CSC101 + s.CSC102 + s.CSC103) / 3;
+        let avgRounded = avg.toFixed(1);
+        let status = avg >= 50 ? "Pass" : "Fail";
+        let statusClass = avg >= 50 ? "pass" : "fail";
+
+        let row = "<tr>";
+        row += "<td>" + s.name + "</td>";
+        row += "<td>" + s.CSC101 + "</td>";
+        row += "<td>" + s.CSC102 + "</td>";
+        row += "<td>" + s.CSC103 + "</td>";
+        row += "<td>" + avgRounded + "</td>";
+        row += '<td class="' + statusClass + '">' + status + "</td>";
+        row += "</tr>";
+
+        tbody.innerHTML += row;
+      }
+    }
+
+    buildTable(data.classA, "bodyA");
+    buildTable(data.classB, "bodyB");
+
+
+    // ============================================================
+    //  PART 2: REGISTRATION FORM VALIDATOR
+    // ============================================================
+
+    function validateUsername() {
+      let input = document.getElementById("username");
+      let feedback = document.getElementById("usernameFeedback");
+      let value = input.value;
+
+      let regex = /^[a-zA-Z0-9]{5,15}$/;
+
+      if (value === "") {
+        feedback.innerHTML = "";
+        feedback.className = "feedback";
+        input.className = "";
+        return false;
+      }
+
+      if (regex.test(value)) {
+        feedback.innerHTML = "✅ Username looks good!";
+        feedback.className = "feedback ok";
+        input.className = "valid-input";
+        return true;
+      } else {
+        feedback.innerHTML = "❌ Username must be 5–15 characters, letters and numbers only.";
+        feedback.className = "feedback error";
+        input.className = "invalid-input";
+        return false;
+      }
+    }
+
+    function validatePassword() {
+      let input = document.getElementById("password");
+      let feedback = document.getElementById("passwordFeedback");
+      let value = input.value;
+
+      // min 8 chars, at least 1 uppercase, 1 digit, 1 special character
+      let regex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/;
+
+      if (value === "") {
+        feedback.innerHTML = "";
+        feedback.className = "feedback";
+        input.className = "";
+        return false;
+      }
+
+      if (regex.test(value)) {
+        feedback.innerHTML = "✅ Password is strong!";
+        feedback.className = "feedback ok";
+        input.className = "valid-input";
+        return true;
+      } else {
+        feedback.innerHTML = "❌ Password must be at least 8 characters, include 1 uppercase letter, 1 number, and 1 special character.";
+        feedback.className = "feedback error";
+        input.className = "invalid-input";
+        return false;
+      }
+    }
+
+    function validatePhone() {
+      let input = document.getElementById("phone");
+      let feedback = document.getElementById("phoneFeedback");
+      let value = input.value;
+
+      // +234 followed by exactly 10 digits
+      let regex = /^\+234\d{10}$/;
+
+      if (value === "") {
+        feedback.innerHTML = "";
+        feedback.className = "feedback";
+        input.className = "";
+        return false;
+      }
+
+      if (regex.test(value)) {
+        feedback.innerHTML = "✅ Phone number is valid!";
+        feedback.className = "feedback ok";
+        input.className = "valid-input";
+        return true;
+      } else {
+        feedback.innerHTML = "❌ Phone number must start with +234 followed by 10 digits.";
+        feedback.className = "feedback error";
+        input.className = "invalid-input";
+        return false;
+      }
+    }
+
+    function submitForm() {
+      let u = validateUsername();
+      let p = validatePassword();
+      let ph = validatePhone();
+      let result = document.getElementById("form-result");
+
+      if (u && p && ph) {
+        result.innerHTML = "✅ Form submitted successfully!";
+        result.style.color = "green";
+      } else {
+        result.innerHTML = "❌ Please fix the errors above before submitting.";
+        result.style.color = "red";
+      }
+    }
+
+  </script>
+
+</body>
+</html>
